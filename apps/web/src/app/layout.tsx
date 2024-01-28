@@ -8,6 +8,8 @@ import { ThemeProvider } from "@/context/ThemeProvider";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ModeToggle } from "@/components/ThemeToggle";
 import { TRPCReactProvider } from "@/trpc/react";
+import { ClerkProvider } from '@clerk/nextjs';
+import { auth, currentUser } from "@clerk/nextjs";
 
 const inter = Inter({
   subsets: ["latin"],
@@ -20,37 +22,41 @@ export const metadata:Metadata = {
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode;
-}): JSX.Element {
+}) {
+  const { userId } = auth();
+  const user = await currentUser()
   return (
     <html lang="en">
       <TRPCReactProvider>
-        <SocketProvider>
-          <body className={inter.className}>
-            <ThemeProvider attribute="class" defaultTheme="system">
-              <main>
-                <nav className="flex items-center justify-between px-4 py-2">
-                  <span>Watch-Together</span>
-                  <div className="flex items-center justify-between gap-2">
-                    <ModeToggle />
-                    <Avatar>
-                      <AvatarImage
-                        src="https://github.com/shadcn.png"
-                        alt="@shadcn"
-                        />
-                      <AvatarFallback>CN</AvatarFallback>
-                    </Avatar>
-                  </div>
-                </nav>
-                {children}
-              </main>
-              <Toaster />
-            </ThemeProvider>
-          </body>
-        </SocketProvider>
+        <ClerkProvider>
+          <SocketProvider>
+            <body className={inter.className}>
+              <ThemeProvider attribute="class" defaultTheme="system">
+                <main>
+                  <nav className="w-screen flex items-center justify-between px-4 py-2 fixed">
+                    <span>Watch-Together</span>
+                    <div className="flex items-center justify-between gap-2">
+                      <ModeToggle />
+                      <Avatar>
+                        <AvatarImage
+                          src="https://github.com/shadcn.png"
+                          alt="@shadcn"
+                          />
+                        <AvatarFallback>CN</AvatarFallback>
+                      </Avatar>
+                    </div>
+                  </nav>
+                  {children}
+                </main>
+                <Toaster />
+              </ThemeProvider>
+            </body>
+          </SocketProvider>
+        </ClerkProvider>
       </TRPCReactProvider>
     </html>
   );

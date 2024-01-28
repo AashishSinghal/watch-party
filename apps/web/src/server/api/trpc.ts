@@ -6,11 +6,14 @@
  * TL;DR - This is where all the tRPC server stuff is created and plugged in. The pieces you will
  * need to use are documented accordingly near the end.
  */
-import { initTRPC } from "@trpc/server";
+import { initTRPC, TRPCError } from "@trpc/server";
+import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import superjson from "superjson";
 import { ZodError } from "zod";
-
+import { getAuth, SignedInAuthObject, SignedOutAuthObject } from '@clerk/nextjs/server';
 import { db } from "@/server/db";
+import { PrismaClient } from "@prisma/client";
+import { NextRequest } from "next/server";
 
 /**
  * 1. CONTEXT
@@ -24,11 +27,24 @@ import { db } from "@/server/db";
  *
  * @see https://trpc.io/docs/server/context
  */
-export const createTRPCContext = async (opts: { headers: Headers }) => {
+
+
+interface AuthContext {
+  auth: SignedInAuthObject | SignedOutAuthObject;
+  headers: Headers
+}
+ 
+export const createContextInner = async ({ auth, headers }: AuthContext  ) => {
   return {
+    auth,
     db,
-    ...opts,
-  };
+    headers
+  }
+}
+ 
+
+export const createTRPCContext = async (opts: {req: NextRequest, headers: Headers}) => {
+  return await createContextInner({auth: getAuth(opts.req), headers:opts.headers })
 };
 
 /**
@@ -66,6 +82,18 @@ const t = initTRPC.context<typeof createTRPCContext>().create({
  */
 export const createTRPCRouter = t.router;
 
+// check if the user is signed in, otherwise throw a UNAUTHORIZED CODE
+const isAuthed = t.middleware(({ next, ctx }) => {
+  if (!ctx.auth.userId) {
+    throw new TRPCError({ code: 'UNAUTHORIZED' })
+  }
+  return next({
+    ctx: {
+      auth: ctx.auth,
+    },
+  })
+})
+
 /**
  * Public (unauthenticated) procedure
  *
@@ -74,3 +102,6 @@ export const createTRPCRouter = t.router;
  * are logged in.
  */
 export const publicProcedure = t.procedure;
+
+// export this procedure to be used anywhere in your application
+export const protectedProcedure = t.procedure.use(isAuthed)
