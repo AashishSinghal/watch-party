@@ -1,10 +1,10 @@
 "use client";
 import React, { useState } from "react";
-import { Button } from "../components/ui/button";
+import { Button } from "./ui/button";
 import { useSocket } from "@/context/SocketProvider";
 import { Input } from "@/components/ui/input";
 
-const Home = () => {
+const Chat = () => {
   const { sendMessage, messages } = useSocket();
   const [message, setMessage] = useState("");
   return (
@@ -27,4 +27,4 @@ const Home = () => {
   );
 };
 
-export default Home;
+export default Chat;

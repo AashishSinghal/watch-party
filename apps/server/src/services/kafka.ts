@@ -49,7 +49,7 @@ export async function startMessageConsumer() {
       try {
         await prismClient.message.create({
           data: {
-            text: message.value?.toString(),
+            content: message.value?.toString(),
           },
         });
       } catch (error) {
