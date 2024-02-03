@@ -1,17 +1,19 @@
 import { Server } from "socket.io";
 import { Redis, RedisOptions } from "ioredis";
-import prismClient from "./prisma";
+import prismaClient from "./prisma";
 import { produceMessage } from "./kafka";
 
-const redisCreds: RedisOptions = {
-  host: process.env.REDIS_HOST!,
-  port: Number(process.env.PORT!),
-  username: process.env.REDIS_USERNAME!,
-  password: process.env.REDIS_PASSWORD!,
-};
+// const redisCreds: RedisOptions = {
+//   host: process.env.REDIS_HOST!,
+//   port: Number(process.env.PORT!),
+//   username: process.env.REDIS_USERNAME!,
+//   password: process.env.REDIS_PASSWORD!,
+// };
 
-const pub = new Redis(redisCreds);
-const sub = new Redis(redisCreds);
+const redisUri = process.env.REDIS_URI!
+
+const pub = new Redis(redisUri);
+const sub = new Redis(redisUri);
 
 class SocketService {
   private _io: Server;
@@ -45,7 +47,7 @@ class SocketService {
         io.emit("message", message);
         await produceMessage(message);
         console.log("Message produced to kafka broker");
-        // await prismClient.message.create({
+        // await prismaClient.message.create({
         //   data: {
         //     text: message,
         //   },

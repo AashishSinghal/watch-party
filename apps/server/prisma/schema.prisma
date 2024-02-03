@@ -11,11 +11,12 @@ datasource db {
 // Define the User entity
 model User {
   id        String     @id @default(uuid())
-  username  String     @unique
-  password  String // You should store hashed passwords in production
+  firstName String
+  lastName  String
   email     String     @unique
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  imageUrl  String?
   // Add more fields as needed, such as profile information, etc.
   UserRoom  UserRoom[]
   Message   Message[]
@@ -28,6 +29,7 @@ model Room {
   password  String?
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
+  banned    Boolean
   // Define a many-to-many relationship between users and rooms
   users     UserRoom[]
   // Add more fields as needed, such as room settings, etc.
@@ -51,10 +53,10 @@ model Message {
   createdAt DateTime @default(now()) @map("created_at")
   updatedAt DateTime @default(now()) @updatedAt
   // Define a many-to-one relationship between messages and users
-  user      User?     @relation(fields: [userId], references: [id])
+  user      User?    @relation(fields: [userId], references: [id])
   userId    String?
   // Define a many-to-one relationship between messages and rooms
-  room      Room?     @relation(fields: [roomId], references: [id])
+  room      Room?    @relation(fields: [roomId], references: [id])
   roomId    String?
   // Add more fields as needed, such as message type, attachments, etc.
 

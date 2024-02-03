@@ -1,18 +1,23 @@
-import { CreateRoom } from "@/components/CreateRoom";
-import { Button } from "@/components/ui/button";
+import CreateRoom from "@/components/CreateRoom";
+import { createUser } from "@/lib/userService";
+import { getFormatedUserData, prismaClient } from "@/lib/utils";
+import { currentUser } from "@clerk/nextjs";
 import Link from "next/link";
 import React from "react";
 
-let user = true;
-
-const page = () => {
+const page = async () => {
+  const user = await currentUser();
+  if (user) {
+    const formattedUser = getFormatedUserData(user);
+    await createUser(formattedUser);
+  }
   return (
-    <div className="min-h-screen flex items-center justify-center">
+    <div className="flex min-h-screen items-center justify-center">
       <div className="text-center">
-        <h1 className="text-4xl font-bold mb-6">
+        <h1 className="mb-6 text-4xl font-bold">
           Welcome to Your Media Sharing Platform!
         </h1>
-        <p className="text-lg mb-8">
+        <p className="mb-8 text-lg">
           Share and watch media together with your friends in real-time.
         </p>
         <div>
@@ -22,7 +27,7 @@ const page = () => {
               <div className="flex justify-center">
                 <a
                   href="/sign-in"
-                  className="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded"
+                  className="rounded bg-green-500 px-4 py-2 font-bold text-white hover:bg-green-600"
                 >
                   Join Watchtogether
                 </a>
@@ -35,7 +40,7 @@ const page = () => {
                 <CreateRoom />
                 <Link
                   href={"/rooms"}
-                  className="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded"
+                  className="rounded bg-yellow-500 px-4 py-2 font-bold text-white hover:bg-yellow-600"
                 >
                   Join Room
                 </Link>

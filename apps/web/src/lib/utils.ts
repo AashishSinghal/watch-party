@@ -7,6 +7,22 @@ export function cn(...inputs: ClassValue[]) {
 
 import { PrismaClient } from "@prisma/client";
 
-export const prismClient = new PrismaClient({
+export const prismaClient = new PrismaClient({
   log: ["query"],
 });
+
+export const getFormatedUserData = (user:any, isClient:boolean = false) => {
+  if(isClient) {
+    const { id, firstName, lastName, primaryEmailAddress, imageUrl} = user;
+    const { emailAddress } = primaryEmailAddress;
+    return {
+      id, firstName, lastName, email:emailAddress, imageUrl
+    }
+  }
+  const { id, firstName, lastName, emailAddresses, imageUrl} = user;
+  const { emailAddress } = emailAddresses[0];
+    
+  return {
+    id, firstName, lastName, email:emailAddress, imageUrl
+  }
+}

@@ -1,7 +1,10 @@
 import { Kafka, KafkaConfig, Producer } from "kafkajs";
 import fs from "fs";
 import path from "path";
-import prismClient from "./prisma";
+import prismaClient from "./prisma";
+import dotenv from 'dotenv';
+
+dotenv.config()
 
 const kafkaCreds: KafkaConfig = {
   brokers: [process.env.KAFKA_HOST_WITH_PORT!],
@@ -47,7 +50,7 @@ export async function startMessageConsumer() {
       if (!message.value) return;
       console.log("new msg rec...");
       try {
-        await prismClient.message.create({
+        await prismaClient.message.create({
           data: {
             content: message.value?.toString(),
           },

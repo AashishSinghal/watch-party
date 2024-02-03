@@ -1,3 +1,8 @@
+'use client'
+
+import { useState } from "react";
+import { getFormatedUserData } from "@/lib/utils";
+import { useUser } from "@clerk/nextjs";
 import { Button } from "@/components/ui/button";
 import {
   Dialog,
@@ -10,8 +15,24 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { api } from "@/trpc/react";
 
-export function CreateRoom() {
+export default function CreateRoom() {
+  const [name, setName] = useState<string>('')
+  const { isSignedIn, user, isLoaded } = useUser();
+  console.log("user in client - ", user)
+  if(user){
+    console.log("formated user - ", getFormatedUserData(user, true))
+  }
+
+  const createRoom = () => {
+    const createRoomMutation = api.room.createRoom.useMutation().mutate({
+      name,
+      
+    })
+
+
+  }
   return (
     <Dialog>
       <DialogTrigger asChild>
@@ -34,7 +55,7 @@ export function CreateRoom() {
             <Label htmlFor="name" className="text-right">
               Room Name
             </Label>
-            <Input id="name" value="Pedro Duarte" className="col-span-3" />
+            <Input id="name" name="name" value="Pedro Duarte" className="col-span-3" />
           </div>
           <div className="grid grid-cols-4 items-center gap-4">
             <Label htmlFor="username" className="text-right">
@@ -47,7 +68,7 @@ export function CreateRoom() {
           <Button variant="outline" type="submit">
             Cancle
           </Button>
-          <Button type="submit">Create</Button>
+          <Button type="submit" onClick={createRoom}>Create</Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>

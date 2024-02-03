@@ -10,7 +10,11 @@ import { initTRPC, TRPCError } from "@trpc/server";
 import { type CreateNextContextOptions } from "@trpc/server/adapters/next";
 import superjson from "superjson";
 import { ZodError } from "zod";
-import { getAuth, SignedInAuthObject, SignedOutAuthObject } from '@clerk/nextjs/server';
+import {
+  getAuth,
+  SignedInAuthObject,
+  SignedOutAuthObject,
+} from "@clerk/nextjs/server";
 import { db } from "@/server/db";
 import { PrismaClient } from "@prisma/client";
 import { NextRequest } from "next/server";
@@ -28,23 +32,27 @@ import { NextRequest } from "next/server";
  * @see https://trpc.io/docs/server/context
  */
 
-
 interface AuthContext {
-  auth: SignedInAuthObject | SignedOutAuthObject;
-  headers: Headers
+  auth: SignedInAuthObject | SignedOutAuthObject | null;
+  headers: Headers;
 }
- 
-export const createContextInner = async ({ auth, headers }: AuthContext  ) => {
+
+export const createContextInner = async ({ auth, headers }: AuthContext) => {
   return {
     auth,
     db,
-    headers
-  }
-}
- 
+    headers,
+  };
+};
 
-export const createTRPCContext = async (opts: {req: NextRequest, headers: Headers}) => {
-  return await createContextInner({auth: getAuth(opts.req), headers:opts.headers })
+export const createTRPCContext = async (opts: {
+  req?: NextRequest;
+  headers: Headers;
+}) => {
+  return await createContextInner({
+    auth: opts.req ? getAuth(opts.req) : null,
+    headers: opts.headers,
+  });
 };
 
 /**
@@ -85,14 +93,14 @@ export const createTRPCRouter = t.router;
 // check if the user is signed in, otherwise throw a UNAUTHORIZED CODE
 const isAuthed = t.middleware(({ next, ctx }) => {
   if (!ctx.auth.userId) {
-    throw new TRPCError({ code: 'UNAUTHORIZED' })
+    throw new TRPCError({ code: "UNAUTHORIZED" });
   }
   return next({
     ctx: {
       auth: ctx.auth,
     },
-  })
-})
+  });
+});
 
 /**
  * Public (unauthenticated) procedure
@@ -104,4 +112,4 @@ const isAuthed = t.middleware(({ next, ctx }) => {
 export const publicProcedure = t.procedure;
 
 // export this procedure to be used anywhere in your application
-export const protectedProcedure = t.procedure.use(isAuthed)
+export const protectedProcedure = t.procedure.use(isAuthed);
