@@ -57,10 +57,6 @@ export default function CreateRoom() {
     setRoomData({ ...roomData, [e.currentTarget.name]: e.currentTarget.value });
   };
 
-  useEffect(() => {
-    console.log("Room Data - ", roomData);
-  }, [roomData]);
-
   return (
     <Dialog>
       <DialogTrigger asChild>

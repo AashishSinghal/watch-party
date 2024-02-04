@@ -34,22 +34,39 @@ class SocketService {
 
     console.log("Init Socket Listeners...");
 
+    const emailToSocketIdMap = new Map();
+    const socketIdToEmailMap = new Map();
+
     io.on("connection", (socket) => {
       console.log(`New Socket connected - `, socket.id);
-      socket.on(
-        "event:messsage",
-        async (data: IRedisMessageEventData) => {
-          console.log("New msg rec - ", data);
-          const { user, message, roomId } = data;
-          await pub.publish(
-            "MESSAGES",
-            JSON.stringify({ message, user, roomId })
-          );
-        }
-      );
+      socket.on("event:messsage", async (data: IRedisMessageEventData) => {
+        console.log("New msg rec - ", data);
+        const { user, message, roomId } = data;
+        await pub.publish(
+          "MESSAGES",
+          JSON.stringify({ message, user, roomId })
+        );
+      });
       socket.on("room:join", async ({ roomId, user }: any) => {
         console.log("roomId - ", roomId);
         console.log("user - ", user);
+        emailToSocketIdMap.set(user.email, {
+          user,
+          roomId,
+          socketId: socket.id,
+        });
+        socketIdToEmailMap.set(socket.id, {
+          user,
+          roomId,
+          socketId: socket.id,
+        });
+        io.to(roomId).emit("user:joined", {
+          user,
+          roomId,
+          socketId: socket.id,
+        });
+        socket.join(roomId);
+        io.to(socket.id).emit("room:join", { user, roomId });
       });
     });
 
@@ -60,11 +77,13 @@ class SocketService {
         io.emit("message", data);
         await produceMessage(data);
         console.log("Message produced to kafka broker");
-        // await prismaClient.message.create({
-        //   data: {
-        //     text: message,
-        //   },
-        // });
+        await prismaClient.message.create({
+          data: {
+            content: message,
+            userId: user.id,
+            roomId: roomId,
+          },
+        });
       }
     });
   }

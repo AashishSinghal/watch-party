@@ -1,6 +1,6 @@
 "use client";
 import { api } from "@/trpc/react";
-import React from "react";
+import React, { useCallback, useEffect } from "react";
 
 import {
   Table,
@@ -14,20 +14,39 @@ import {
 import { Button } from "@/components/ui/button";
 import { ChevronRight, DeleteIcon, Edit2Icon, LogIn } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useSocket } from "@/context/SocketProvider";
+import { useUser } from "@clerk/nextjs";
+import { getFormatedUserData } from "@/lib/utils";
 
 const Rooms = () => {
   const router = useRouter();
+  const { user } = useUser();
   const { isSuccess, data, isPending } = api.room.getAllRooms.useQuery();
-  console.log("Data - ", data);
+  const { socket } = useSocket();
+  const formattedUser = getFormatedUserData(user);
 
   //   Handle User Join Room
+
+  const handleUserJoin = useCallback(({ user, roomId, socketId }: any) => {
+    console.log("User joined - ", user.email);
+    router.push(`/rooms/${roomId}`);
+  }, []);
+
   const joinRoom = (id: string) => {
     if (id) {
-      router.push(`/rooms/${id}`);
+      socket?.emit("room:join", { user: formattedUser, roomId: id });
     } else {
       alert("Id null");
     }
   };
+
+  useEffect(() => {
+    socket?.on("room:join", handleUserJoin);
+    return () => {
+      socket?.off("room:join", handleUserJoin);
+    };
+  }, [socket]);
+
   const openDialog = () => {};
   return (
     <div className="flex min-h-screen flex-col items-center px-4 pt-[50px]">

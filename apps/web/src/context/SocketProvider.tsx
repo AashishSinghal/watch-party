@@ -10,8 +10,9 @@ interface SocketProviderProps {
 
 interface ISocketContext {
   socket: Socket | undefined;
-  sendMessage: (msg: string, user: any, roomId: string) => any;
-  messages: string[];
+  sendMessage: (message: string, user: any, roomId: string, remoteSocketId: string) => any;
+  messages: IRedisMessageEventData[];
+  setMessages: React.Dispatch<React.SetStateAction<IRedisMessageEventData[]>>;
 }
 
 const SocketContext = React.createContext<ISocketContext | null>(null);
@@ -26,29 +27,33 @@ export const useSocket = () => {
 
 export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket>();
-  const [messages, setMessages] = useState<string[]>([]);
+  const [messages, setMessages] = useState<IRedisMessageEventData[]>([]);
 
   const sendMessage: ISocketContext["sendMessage"] = useCallback(
-    (msg, user, roomId) => {
-      console.log("Send Message - ", msg);
+    (message, user, roomId, remoteSocketId) => {
+      console.log("Send Message - ", message);
       if (socket) {
-        socket.emit("event:messsage", { message: msg, user, roomId });
+        socket.emit("event:messsage", { message, user, roomId });
       }
     },
     [socket],
   );
 
   const onMessageRec = useCallback((data: string) => {
-    console.log("Message rec from server - ", data);
-    const { message } = JSON.parse(data) as IRedisMessageEventData;
-    setMessages((prev) => [...prev, message]);
+    const { message, user, roomId } = JSON.parse(
+      data,
+    ) as IRedisMessageEventData;
+    setMessages((prev: IRedisMessageEventData[]) => [
+      ...prev,
+      { message, user, roomId },
+    ]);
   }, []);
 
   useEffect(() => {
     const _socket = io("http://localhost:8000");
     _socket.on("message", onMessageRec);
     setSocket(_socket);
-    console.log("socket - ", _socket);
+    console.log("messages - ", messages);
     return () => {
       _socket.off("message", onMessageRec);
       _socket.disconnect();
@@ -57,7 +62,9 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <SocketContext.Provider value={{ sendMessage, messages, socket }}>
+    <SocketContext.Provider
+      value={{ sendMessage, messages, socket, setMessages }}
+    >
       {children}
     </SocketContext.Provider>
   );
