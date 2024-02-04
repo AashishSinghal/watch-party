@@ -5,3 +5,9 @@ export interface IUser {
   email: string;
   imageUrl: string;
 }
+
+export interface IRoomData {
+  name: string;
+  password: string;
+  isPrivate: boolean;
+}

@@ -9,7 +9,9 @@ const page = async () => {
   const user = await currentUser();
   if (user) {
     const formattedUser = getFormatedUserData(user);
-    await createUser(formattedUser);
+    if (formattedUser) {
+      await createUser(formattedUser);
+    }
   }
   return (
     <div className="flex min-h-screen items-center justify-center">

@@ -10,7 +10,7 @@ import { produceMessage } from "./kafka";
 //   password: process.env.REDIS_PASSWORD!,
 // };
 
-const redisUri = process.env.REDIS_URI!
+const redisUri = process.env.REDIS_URI!;
 
 const pub = new Redis(redisUri);
 const sub = new Redis(redisUri);
@@ -35,9 +35,16 @@ class SocketService {
 
     io.on("connection", (socket) => {
       console.log(`New Socket connected - `, socket.id);
-      socket.on("event:messsage", async ({ message }: { message: string }) => {
-        console.log("New msg rec - ", message);
-        await pub.publish("MESSAGES", JSON.stringify({ message }));
+      socket.on("event:messsage", async (data: { message: string }) => {
+        console.log("New msg rec - ", data);
+        await pub.publish(
+          "MESSAGES",
+          JSON.stringify({ message: data.message })
+        );
+      });
+      socket.on("room:join", async ({ roomId, user }: any) => {
+        console.log("roomId - ", roomId);
+        console.log("user - ", user);
       });
     });
 

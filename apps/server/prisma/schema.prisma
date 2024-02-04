@@ -20,6 +20,7 @@ model User {
   // Add more fields as needed, such as profile information, etc.
   UserRoom  UserRoom[]
   Message   Message[]
+  Room      Room[]
 }
 
 // Define the Room entity
@@ -27,13 +28,15 @@ model Room {
   id        String     @id @default(uuid())
   name      String
   password  String?
+  isPrivate Boolean?   @default(false)
   createdAt DateTime   @default(now())
   updatedAt DateTime   @updatedAt
-  banned    Boolean
+  createdby User       @relation(fields: [userId], references: [id])
   // Define a many-to-many relationship between users and rooms
-  users     UserRoom[]
+  UserRoom  UserRoom[]
   // Add more fields as needed, such as room settings, etc.
   Message   Message[]
+  userId    String
 }
 
 // Define the UserRoom join table for the many-to-many relationship

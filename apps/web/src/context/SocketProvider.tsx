@@ -8,7 +8,8 @@ interface SocketProviderProps {
 }
 
 interface ISocketContext {
-  sendMessage: (msg: string) => any;
+  socket: Socket | undefined;
+  sendMessage: (msg: string, user: any, roomId: string) => any;
   messages: string[];
 }
 
@@ -27,13 +28,13 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [messages, setMessages] = useState<string[]>([]);
 
   const sendMessage: ISocketContext["sendMessage"] = useCallback(
-    (msg) => {
+    (msg, user, roomId) => {
       console.log("Send Message - ", msg);
       if (socket) {
-        socket.emit("event:messsage", { message: msg });
+        socket.emit("event:messsage", { message: msg, user, roomId });
       }
     },
-    [socket]
+    [socket],
   );
 
   const onMessageRec = useCallback((msg: string) => {
@@ -55,7 +56,7 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   }, []);
 
   return (
-    <SocketContext.Provider value={{ sendMessage, messages }}>
+    <SocketContext.Provider value={{ sendMessage, messages, socket }}>
       {children}
     </SocketContext.Provider>
   );

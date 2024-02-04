@@ -6,6 +6,18 @@
       "dependsOn": ["^build"],
       "outputs": [".next/**", "!.next/cache/**"]
     },
+    "web#build": {
+      // override settings for the "build" task for the "web" app
+      "dependsOn": ["^build"],
+      "env": ["SOME_OTHER_ENV_VAR"],
+      "outputs": [".next/**", "!.next/cache/**"]
+    },
+    "server#build": {
+      // override settings for the "build" task for the "web" app
+      "dependsOn": ["^build"],
+      "env": ["SOME_OTHER_ENV_VAR"],
+      "outputs": ["dist/**"]
+    },
     "lint": {
       "dependsOn": ["^lint"]
     },
