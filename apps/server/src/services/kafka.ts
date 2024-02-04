@@ -2,9 +2,9 @@ import { Kafka, KafkaConfig, Producer } from "kafkajs";
 import fs from "fs";
 import path from "path";
 import prismaClient from "./prisma";
-import dotenv from 'dotenv';
+import dotenv from "dotenv";
 
-dotenv.config()
+dotenv.config();
 
 const kafkaCreds: KafkaConfig = {
   brokers: [process.env.KAFKA_HOST_WITH_PORT!],
@@ -30,10 +30,15 @@ export async function createProducer() {
   return producer;
 }
 
-export async function produceMessage(message: string) {
+export async function produceMessage(data: string) {
   const producer = await createProducer();
   await producer.send({
-    messages: [{ key: `message-${Date.now()}`, value: message }],
+    messages: [
+      {
+        key: `message-${Date.now()}`,
+        value: data,
+      },
+    ],
     topic: "MESSAGES",
   });
   return true;
@@ -48,11 +53,18 @@ export async function startMessageConsumer() {
     autoCommit: true,
     eachMessage: async ({ message, pause }) => {
       if (!message.value) return;
-      console.log("new msg rec...");
+      console.log("new msg rec...", message);
+      const {
+        message: textMessage,
+        user,
+        roomId,
+      } = JSON.parse(message.value.toString("utf-8"));
       try {
         await prismaClient.message.create({
           data: {
-            content: message.value?.toString(),
+            content: textMessage,
+            userId: user.id,
+            roomId,
           },
         });
       } catch (error) {

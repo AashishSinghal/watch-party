@@ -1,5 +1,6 @@
 "use client";
 
+import { IRedisMessageEventData } from "@/lib/types";
 import React, { useCallback, useContext, useEffect, useState } from "react";
 import { io, Socket } from "socket.io-client";
 
@@ -37,9 +38,9 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     [socket],
   );
 
-  const onMessageRec = useCallback((msg: string) => {
-    console.log("Message rec from server - ", msg);
-    const { message } = JSON.parse(msg) as { message: string };
+  const onMessageRec = useCallback((data: string) => {
+    console.log("Message rec from server - ", data);
+    const { message } = JSON.parse(data) as IRedisMessageEventData;
     setMessages((prev) => [...prev, message]);
   }, []);
 

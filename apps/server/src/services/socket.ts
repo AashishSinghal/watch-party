@@ -2,6 +2,7 @@ import { Server } from "socket.io";
 import { Redis, RedisOptions } from "ioredis";
 import prismaClient from "./prisma";
 import { produceMessage } from "./kafka";
+import { IRedisMessageEventData } from "../utils/types";
 
 // const redisCreds: RedisOptions = {
 //   host: process.env.REDIS_HOST!,
@@ -35,24 +36,29 @@ class SocketService {
 
     io.on("connection", (socket) => {
       console.log(`New Socket connected - `, socket.id);
-      socket.on("event:messsage", async (data: { message: string }) => {
-        console.log("New msg rec - ", data);
-        await pub.publish(
-          "MESSAGES",
-          JSON.stringify({ message: data.message })
-        );
-      });
+      socket.on(
+        "event:messsage",
+        async (data: IRedisMessageEventData) => {
+          console.log("New msg rec - ", data);
+          const { user, message, roomId } = data;
+          await pub.publish(
+            "MESSAGES",
+            JSON.stringify({ message, user, roomId })
+          );
+        }
+      );
       socket.on("room:join", async ({ roomId, user }: any) => {
         console.log("roomId - ", roomId);
         console.log("user - ", user);
       });
     });
 
-    sub.on("message", async (channel, message) => {
+    sub.on("message", async (channel, data) => {
       if (channel === "MESSAGES") {
-        console.log("new message from redis - ", message);
-        io.emit("message", message);
-        await produceMessage(message);
+        const { message, user, roomId } = JSON.parse(data);
+        console.log("new message from redis - ", data);
+        io.emit("message", data);
+        await produceMessage(data);
         console.log("Message produced to kafka broker");
         // await prismaClient.message.create({
         //   data: {
