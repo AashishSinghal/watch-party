@@ -11,60 +11,54 @@ import { IRedisMessageEventData } from "@/lib/types";
 import Message from "./Message";
 import { Badge } from "./ui/badge";
 
-const Chat = ({ roomId }: { roomId: string }) => {
-  const [isUserJoined, setIsUserJoined] = useState<boolean>(true);
-  const [remoteSocketId, setRemoteSocketId] = useState<string>("");
-  const { sendMessage, socket, messages, setMessages } = useSocket();
-  const [message, setMessage] = useState<string>("");
+type IChatProps = {
+  roomId: string;
+  isUserJoined: boolean;
+  remoteSocketId: string;
+  messages: IRedisMessageEventData[];
+  message: string;
+  handleUserJoin: (params: any) => void;
+  sendMessage: (
+    message: string,
+    user: any,
+    roomId: string,
+    remoteSocketId: string,
+  ) => void;
+  setMessage: React.Dispatch<React.SetStateAction<string>>;
+};
+
+const Chat = ({
+  roomId,
+  isUserJoined,
+  remoteSocketId,
+  messages,
+  message,
+  handleUserJoin,
+  sendMessage,
+  setMessage,
+}: IChatProps) => {
   const { user } = useUser();
   const formattedUser = getFormatedUserData(user, true);
 
-  const handleUserJoin = useCallback(({ user, roomId, socketId }: any) => {
-    console.log("User joined client - ", user.email);
-    setIsUserJoined(true);
-    setRemoteSocketId(socketId);
-    const userJoinedMessage = {
-      message: `${formattedUser?.email} joined chat...`,
-      roomId,
-      user: formattedUser,
-    };
-    setMessages((prev) => [...prev, userJoinedMessage]);
-  }, []);
-
-  const handleMessageSend = (e) => {
+  const handleMessageSend = (
+    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
     e.preventDefault();
     setMessage("");
     sendMessage(message, formattedUser, roomId, remoteSocketId);
   };
-
-  useEffect(() => {
-    socket?.on("user:joined", handleUserJoin);
-
-    return () => {
-      socket?.off("user:joined", handleUserJoin);
-    };
-  }, [socket, handleUserJoin]);
-
-  useEffect(() => {
-    const userJoinedMessage = `${formattedUser?.email} joined chat...`;
-    sendMessage(userJoinedMessage, user, roomId, remoteSocketId);
-    setIsUserJoined(true);
-  }, []);
   return (
     <div className="flex w-full flex-col items-center justify-end">
       {isUserJoined ? (
         <>
           <div className="flex h-72 w-full flex-col items-center justify-start gap-2 overflow-x-hidden overflow-y-scroll border border-cyan-300">
-            {/* Map Messages here */}
-            {console.log("remotesocketId -  ", remoteSocketId.length)}
             {remoteSocketId.length > 0 ? <Badge>{remoteSocketId}</Badge> : null}
-            {messages?.map((data: IRedisMessageEventData) => {
-              const { message: content, roomId, user: messageUser } = data;
-              console.log("message data - ", message);
-              return (
-                <Message currentUserId={user?.id || ""} messageData={data} />
-              );
-            })}
+            {messages?.map((data: IRedisMessageEventData) => (
+              <Message
+                currentUserId={formattedUser?.id || ""}
+                messageData={data}
+              />
+            ))}
           </div>
           <div className="flex w-full items-center justify-between gap-1 p-1">
             <Input

@@ -13,7 +13,6 @@ const Message = ({
 }) => {
   const { message, user, roomId } = messageData;
   if (message.includes("joined")) {
-    console.log("messageData - ", messageData);
     return (
       <div>
         <Badge className="h-[10px] px-1 py-2 text-[8px]">

@@ -29,11 +29,11 @@ const Rooms = () => {
 
   const handleUserJoin = useCallback(({ user, roomId, socketId }: any) => {
     console.log("User joined - ", user.email);
-    router.push(`/rooms/${roomId}`);
   }, []);
 
   const joinRoom = (id: string) => {
     if (id) {
+      router.push(`/rooms/${id}`);
       socket?.emit("room:join", { user: formattedUser, roomId: id });
     } else {
       alert("Id null");

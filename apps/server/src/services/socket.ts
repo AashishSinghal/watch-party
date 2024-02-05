@@ -39,7 +39,7 @@ class SocketService {
 
     io.on("connection", (socket) => {
       console.log(`New Socket connected - `, socket.id);
-      socket.on("event:messsage", async (data: IRedisMessageEventData) => {
+      socket.on("event:messsage", async ({ remoteSocketId, ...data }: any) => {
         console.log("New msg rec - ", data);
         const { user, message, roomId } = data;
         await pub.publish(
@@ -48,8 +48,6 @@ class SocketService {
         );
       });
       socket.on("room:join", async ({ roomId, user }: any) => {
-        console.log("roomId - ", roomId);
-        console.log("user - ", user);
         emailToSocketIdMap.set(user.email, {
           user,
           roomId,
@@ -66,17 +64,21 @@ class SocketService {
           socketId: socket.id,
         });
         socket.join(roomId);
-        io.to(socket.id).emit("room:join", { user, roomId });
+        io.to(socket.id).emit("room:join", {
+          user,
+          roomId,
+          socketId: socket.id,
+        });
       });
     });
 
     sub.on("message", async (channel, data) => {
       if (channel === "MESSAGES") {
         const { message, user, roomId } = JSON.parse(data);
-        console.log("new message from redis - ", data);
+        // console.log("new message from redis - ", data);
         io.emit("message", data);
         await produceMessage(data);
-        console.log("Message produced to kafka broker");
+        // console.log("Message produced to kafka broker");
         await prismaClient.message.create({
           data: {
             content: message,

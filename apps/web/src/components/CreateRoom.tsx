@@ -34,10 +34,10 @@ export default function CreateRoom() {
   const formattedUser = getFormatedUserData(user, true);
   const { isPending, isSuccess, data, mutate } =
     api.room.createRoom.useMutation();
-  // console.log("createRoomMutation - ", createRoomMutation);
+
   const createRoom = async () => {
     if (formattedUser) {
-      const result = await mutate({
+      await mutate({
         name,
         password,
         isPrivate,
@@ -46,7 +46,6 @@ export default function CreateRoom() {
       if (isSuccess) {
         router.push("/rooms");
       }
-      console.log("createRoomMutation - ", result);
     } else {
       console.log("formatted user null !!");
     }

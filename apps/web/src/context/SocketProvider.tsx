@@ -10,7 +10,12 @@ interface SocketProviderProps {
 
 interface ISocketContext {
   socket: Socket | undefined;
-  sendMessage: (message: string, user: any, roomId: string, remoteSocketId: string) => any;
+  sendMessage: (
+    message: string,
+    user: any,
+    roomId: string,
+    remoteSocketId: string,
+  ) => any;
   messages: IRedisMessageEventData[];
   setMessages: React.Dispatch<React.SetStateAction<IRedisMessageEventData[]>>;
 }
@@ -31,9 +36,15 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
 
   const sendMessage: ISocketContext["sendMessage"] = useCallback(
     (message, user, roomId, remoteSocketId) => {
-      console.log("Send Message - ", message);
+      console.log("🚀 ~ remoteSocketId:", remoteSocketId);
+      console.log("🚀 ~ message:", message);
       if (socket) {
-        socket.emit("event:messsage", { message, user, roomId });
+        socket.emit("event:messsage", {
+          message,
+          user,
+          roomId,
+          remoteSocketId,
+        });
       }
     },
     [socket],
@@ -53,7 +64,6 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
     const _socket = io("http://localhost:8000");
     _socket.on("message", onMessageRec);
     setSocket(_socket);
-    console.log("messages - ", messages);
     return () => {
       _socket.off("message", onMessageRec);
       _socket.disconnect();
