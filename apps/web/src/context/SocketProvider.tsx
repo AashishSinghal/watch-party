@@ -35,15 +35,13 @@ export const SocketProvider: React.FC<SocketProviderProps> = ({ children }) => {
   const [messages, setMessages] = useState<IRedisMessageEventData[]>([]);
 
   const sendMessage: ISocketContext["sendMessage"] = useCallback(
-    (message, user, roomId, remoteSocketId) => {
-      console.log("🚀 ~ remoteSocketId:", remoteSocketId);
+    (message, user, roomId) => {
       console.log("🚀 ~ message:", message);
       if (socket) {
         socket.emit("event:messsage", {
           message,
           user,
           roomId,
-          remoteSocketId,
         });
       }
     },

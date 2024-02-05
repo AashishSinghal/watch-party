@@ -39,8 +39,7 @@ class SocketService {
 
     io.on("connection", (socket) => {
       console.log(`New Socket connected - `, socket.id);
-      socket.on("event:messsage", async ({ remoteSocketId, ...data }: any) => {
-        console.log("New msg rec - ", data);
+      socket.on("event:messsage", async (data: any) => {
         const { user, message, roomId } = data;
         await pub.publish(
           "MESSAGES",
@@ -67,8 +66,17 @@ class SocketService {
         io.to(socket.id).emit("room:join", {
           user,
           roomId,
-          socketId: socket.id,
         });
+      });
+
+      socket.on("user:call", ({ to, offer }: any) => {
+        console.log("Getting Call from - ", to);
+        io.to(to).emit("incoming:call", { from: socket.id, offer });
+      });
+
+      socket.on("call:accepted", ({ to, answer }) => {
+        console.log("Accepting incomin call - ");
+        io.to(to).emit("call:accepted", { from: socket.id, answer });
       });
     });
 

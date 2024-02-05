@@ -1,6 +1,6 @@
 "use client";
 import { api } from "@/trpc/react";
-import React, { useCallback, useEffect } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 
 import {
   Table,
@@ -27,14 +27,17 @@ const Rooms = () => {
 
   //   Handle User Join Room
 
-  const handleUserJoin = useCallback(({ user, roomId, socketId }: any) => {
-    console.log("User joined - ", user.email);
+  const handleUserJoin = useCallback((data: any) => {
+    console.log("data on room join - ", data);
+    router.push(`/rooms/${data.roomId}`);
   }, []);
 
   const joinRoom = (id: string) => {
     if (id) {
-      router.push(`/rooms/${id}`);
-      socket?.emit("room:join", { user: formattedUser, roomId: id });
+      socket?.emit("room:join", {
+        user: formattedUser,
+        roomId: id,
+      });
     } else {
       alert("Id null");
     }

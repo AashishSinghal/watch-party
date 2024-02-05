@@ -53,7 +53,6 @@ export async function startMessageConsumer() {
     autoCommit: true,
     eachMessage: async ({ message, pause }) => {
       if (!message.value) return;
-      console.log("new msg rec...", message);
       const {
         message: textMessage,
         user,

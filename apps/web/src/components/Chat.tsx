@@ -40,9 +40,14 @@ const Chat = ({
   const { user } = useUser();
   const formattedUser = getFormatedUserData(user, true);
 
-  const handleMessageSend = (
-    e: React.MouseEvent<HTMLButtonElement, MouseEvent>,
-  ) => {
+  const handleKeyDown = (event: React.KeyboardEvent<HTMLInputElement>) => {
+    if (event.key === "Enter") {
+      // Call a function to handle the input
+      handleMessageSend(event);
+    }
+  };
+
+  const handleMessageSend = (e: React.KeyboardEvent<HTMLInputElement>| React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
     e.preventDefault();
     setMessage("");
     sendMessage(message, formattedUser, roomId, remoteSocketId);
@@ -53,8 +58,9 @@ const Chat = ({
         <>
           <div className="flex h-72 w-full flex-col items-center justify-start gap-2 overflow-x-hidden overflow-y-scroll border border-cyan-300">
             {remoteSocketId.length > 0 ? <Badge>{remoteSocketId}</Badge> : null}
-            {messages?.map((data: IRedisMessageEventData) => (
+            {messages?.map((data: IRedisMessageEventData, index) => (
               <Message
+                key={index}
                 currentUserId={formattedUser?.id || ""}
                 messageData={data}
               />
@@ -66,6 +72,9 @@ const Chat = ({
               value={message}
               placeholder="type message..."
               type="text"
+              className="outline-none 
+              ring-0 ring-transparent"
+              onKeyDown={handleKeyDown}
             />
             <Button variant={"outline"} onClick={(e) => handleMessageSend(e)}>
               <Send />

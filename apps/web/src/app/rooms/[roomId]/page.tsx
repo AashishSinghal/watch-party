@@ -18,28 +18,20 @@ const Room = ({ params: { roomId } }: { params: { roomId: string } }) => {
     console.log("User joined client - ", user, socketId);
     setIsUserJoined(true);
     setRemoteSocketId(socketId);
-    const userJoinedMessage = {
-      message: `${formattedUser?.email} joined chat...`,
-      roomId,
-      user: formattedUser,
-    };
-    setMessages((prev) => [...prev, userJoinedMessage]);
   }, []);
 
   useEffect(() => {
     socket?.on("user:joined", handleUserJoin);
-
+    console.log("🚀 ~ useEffect ~ handleUserJoin:");
     return () => {
       socket?.off("user:joined", handleUserJoin);
     };
   }, [socket, handleUserJoin]);
 
   useEffect(() => {
-    const userJoinedMessage = `${formattedUser?.email} joined chat...`;
-    sendMessage(userJoinedMessage, user, roomId, remoteSocketId);
+    // const userJoinedMessage = `${formattedUser?.email} joined chat...`;
     setIsUserJoined(true);
   }, []);
-  console.log("Remote Socket Id - ", remoteSocketId);
   return (
     <div className="flex h-screen w-screen flex-col items-center pt-[55px]">
       <div className="flex h-full w-full">
@@ -47,7 +39,10 @@ const Room = ({ params: { roomId } }: { params: { roomId: string } }) => {
         <div className="flex h-auto w-3/12 flex-col border border-red-500">
           <div className="flex flex-1 border border-blue-500">
             {/* Video */}
-            <Video />
+            <Video
+              remoteSocketId={remoteSocketId}
+              setRemoteSocketId={setRemoteSocketId}
+            />
           </div>
           <div className="flex flex-1 border border-blue-500">
             {/* Chat */}

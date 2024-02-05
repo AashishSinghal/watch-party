@@ -42,7 +42,7 @@ export default async function RootLayout({
   const user = await currentUser();
 
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning={true}>
       <TRPCReactProvider>
         <ClerkProvider
           appearance={{
@@ -50,7 +50,7 @@ export default async function RootLayout({
           }}
         >
           <SocketProvider>
-            <body className={inter.className}>
+            <body className={inter.className} suppressHydrationWarning={true}>
               <ThemeProvider attribute="class" defaultTheme="system">
                 <main>
                   <nav className="fixed flex w-screen items-center justify-between px-4 py-2">
