@@ -14,7 +14,7 @@ import { Badge } from "./ui/badge";
 type IChatProps = {
   roomId: string;
   isUserJoined: boolean;
-  remoteSocketId: string;
+  remoteSocketId: string | null;
   messages: IRedisMessageEventData[];
   message: string;
   handleUserJoin: (params: any) => void;
@@ -22,7 +22,7 @@ type IChatProps = {
     message: string,
     user: any,
     roomId: string,
-    remoteSocketId: string,
+    remoteSocketId: string | null,
   ) => void;
   setMessage: React.Dispatch<React.SetStateAction<string>>;
 };
@@ -47,7 +47,11 @@ const Chat = ({
     }
   };
 
-  const handleMessageSend = (e: React.KeyboardEvent<HTMLInputElement>| React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
+  const handleMessageSend = (
+    e:
+      | React.KeyboardEvent<HTMLInputElement>
+      | React.MouseEvent<HTMLButtonElement, MouseEvent>,
+  ) => {
     e.preventDefault();
     setMessage("");
     sendMessage(message, formattedUser, roomId, remoteSocketId);
@@ -57,7 +61,7 @@ const Chat = ({
       {isUserJoined ? (
         <>
           <div className="flex h-72 w-full flex-col items-center justify-start gap-2 overflow-x-hidden overflow-y-scroll border border-cyan-300">
-            {remoteSocketId.length > 0 ? <Badge>{remoteSocketId}</Badge> : null}
+            {remoteSocketId ? <Badge>{remoteSocketId}</Badge> : null}
             {messages?.map((data: IRedisMessageEventData, index) => (
               <Message
                 key={index}

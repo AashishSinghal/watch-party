@@ -14,7 +14,7 @@ interface ISocketContext {
     message: string,
     user: any,
     roomId: string,
-    remoteSocketId: string,
+    remoteSocketId: string | null,
   ) => any;
   messages: IRedisMessageEventData[];
   setMessages: React.Dispatch<React.SetStateAction<IRedisMessageEventData[]>>;

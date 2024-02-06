@@ -21,10 +21,20 @@ const usePeer = () => {
 
   async function getAnswer(offer: any) {
     if (peer) {
-      await peer.setRemoteDescription(offer);
-      const answer = await peer.createAnswer();
-      await peer.setLocalDescription(new RTCSessionDescription(answer));
-      return answer;
+      let answerResponse: RTCSessionDescriptionInit | null;
+      await peer
+        .setRemoteDescription(offer)
+        .then(() => {
+          return peer.createAnswer();
+        })
+        .then((answer) => {
+          console.log("🚀 ~ getAnswer ~ answer:", answer);
+          answerResponse = answer;
+          return peer.setLocalDescription(new RTCSessionDescription(answer));
+        })
+        .then(() => {
+          return answerResponse;
+        });
     }
   }
 
@@ -36,9 +46,15 @@ const usePeer = () => {
 
   async function getOffer() {
     if (peer) {
-      const offer = await peer.createOffer();
-      await peer.setLocalDescription(new RTCSessionDescription(offer));
-      return offer;
+      let offer: any;
+      await peer
+        .createOffer()
+        .then((offer) => {
+          return peer.setLocalDescription(new RTCSessionDescription(offer));
+        })
+        .then(() => {
+          return offer;
+        });
     }
   }
 

@@ -8,13 +8,14 @@ import Video from "@/components/Video";
 
 const Room = ({ params: { roomId } }: { params: { roomId: string } }) => {
   const [isUserJoined, setIsUserJoined] = useState<boolean>(true);
-  const [remoteSocketId, setRemoteSocketId] = useState<string>("");
+  const [remoteSocketId, setRemoteSocketId] = useState<string | null>(null);
   const { sendMessage, socket, messages, setMessages } = useSocket();
   const [message, setMessage] = useState<string>("");
   const { user } = useUser();
   const formattedUser = getFormatedUserData(user, true);
 
   const handleUserJoin = useCallback(({ user, roomId, socketId }: any) => {
+    console.log("🚀 ~ useEffect ~ handleUserJoin:");
     console.log("User joined client - ", user, socketId);
     setIsUserJoined(true);
     setRemoteSocketId(socketId);
@@ -22,7 +23,6 @@ const Room = ({ params: { roomId } }: { params: { roomId: string } }) => {
 
   useEffect(() => {
     socket?.on("user:joined", handleUserJoin);
-    console.log("🚀 ~ useEffect ~ handleUserJoin:");
     return () => {
       socket?.off("user:joined", handleUserJoin);
     };
@@ -42,6 +42,7 @@ const Room = ({ params: { roomId } }: { params: { roomId: string } }) => {
             <Video
               remoteSocketId={remoteSocketId}
               setRemoteSocketId={setRemoteSocketId}
+              handleUserJoin={handleUserJoin}
             />
           </div>
           <div className="flex flex-1 border border-blue-500">

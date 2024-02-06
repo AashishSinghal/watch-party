@@ -78,6 +78,14 @@ class SocketService {
         console.log("Accepting incomin call - ");
         io.to(to).emit("call:accepted", { from: socket.id, answer });
       });
+
+      socket.on("peer:negotiation:needed", ({ to, offer }) => {
+        io.to(to).emit("peer:negotiation:needed", { from: socket.id, offer });
+      });
+
+      socket.on("peer:negotiation:done", ({ to, answer }) => {
+        io.to(to).emit("peer:negotiation:final", { from: socket.id, answer });
+      });
     });
 
     sub.on("message", async (channel, data) => {
